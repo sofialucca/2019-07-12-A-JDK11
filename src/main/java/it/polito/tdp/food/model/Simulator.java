@@ -55,6 +55,7 @@ public class Simulator {
 		for(int i=0; i<this.K && i<vicini.size(); i++) {
 			this.stazioni.get(i).setLibera(false);
 			this.stazioni.get(i).setFood(vicini.get(i).getFood());
+			vicini.get(i).getFood().setPreparazione(StatoPreparazione.IN_CORSO);
 			
 			Event e = new Event(vicini.get(i).getCalories(),
 					EventType.FINE_PREPARAZIONE,
