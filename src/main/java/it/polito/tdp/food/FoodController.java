@@ -81,7 +81,7 @@ public class FoodController {
 				return false;
 			}
 		}catch(NumberFormatException nfe) {
-			txtResult.appendText("ERRORE: le porzioni devono essere un numero inetero.");
+			txtResult.appendText("ERRORE: le porzioni devono essere un numero intero.");
 			return false;
 		}
 		return true;
@@ -109,10 +109,43 @@ public class FoodController {
     @FXML
     void doSimula(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Simulazione...");
+    	if(!isValid()) {
+    		return;
+    	}
+    	String k = this.txtK.getText();
+    	Food f = this.boxFood.getValue();
+    	model.init(Integer.parseInt(k), f);
+    	model.run();
+    	int nPiatti = model.getNPreparati();
+    	if(nPiatti == 0) {
+    		txtResult.appendText("SIMULAZIONE NON POSSIBILE CON " + f + " PER " + k + " STAZIONI DI LAVORO");
+    	}else {
+    		txtResult.appendText("SIMULAZIOE DI " + k + " STAZIONI, PARTENDO DA " + f);
+    		txtResult.appendText("\n\nTOTALE PREPRAZIONI = " + model.getNPreparati());
+    		txtResult.appendText("\n\nTEMPO IMPIEGATO = " + String.format("%.5g", model.getTempo()) + " minuti");
+    	}
     }
 
-    @FXML // This method is called by the FXMLLoader when initialization is complete
+    private boolean isValid() {
+    	boolean check = true;
+		if(this.boxFood.getValue() == null) {
+			txtResult.appendText("ERRORE: selezionare un cibo\n");
+			check = false;
+		}
+		try {
+			int k = Integer.parseInt(this.txtK.getText());
+			if(k<1 || k>10) {
+				txtResult.appendText("ERRORE: k deve esseere un valore tra 1 e 10");
+				return false;
+			}
+			}catch(NumberFormatException nfe) {
+				txtResult.appendText("ERRORE: k deve essere un numero intero");
+				return false;
+			}
+		return check;
+	}
+
+	@FXML // This method is called by the FXMLLoader when initialization is complete
     void initialize() {
         assert txtPorzioni != null : "fx:id=\"txtPorzioni\" was not injected: check your FXML file 'Food.fxml'.";
         assert txtK != null : "fx:id=\"txtK\" was not injected: check your FXML file 'Food.fxml'.";
