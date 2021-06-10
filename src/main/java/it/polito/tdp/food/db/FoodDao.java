@@ -150,8 +150,9 @@ public class FoodDao {
 	public List<Adiacenti> getArchi(Map<Integer,Food> mappa){
 		String sql = "SELECT fc1.food_code, fc2.food_code, AVG(c1.condiment_calories) AS peso "
 				+ "FROM food_condiment fc1, condiment c1, food_condiment fc2, condiment c2 "
-				+ "WHERE fc1.condiment_code = c1.condiment_code AND fc2.condiment_code = c1.condiment_code "
+				+ "WHERE fc1.condiment_code = c1.condiment_code AND fc2.condiment_code = c2.condiment_code "
 				+ "AND fc1.food_code > fc2.food_code "
+				+ "AND fc1.condiment_code = fc2.condiment_code "
 				+ "GROUP BY fc1.food_code, fc2.food_code";
 		List<Adiacenti> result = new ArrayList<>();
 		

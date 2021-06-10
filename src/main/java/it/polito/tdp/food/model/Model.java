@@ -20,7 +20,6 @@ public class Model {
 	private Graph<Food,DefaultWeightedEdge> grafo;
 	private Map<Integer,Food> idMap;
 	private FoodDao dao;
-	private int NPREPARATI;
 	private double TTOTALE;
 	private int kLiberi;
 	private PriorityQueue<FoodNumber> queue;
@@ -61,31 +60,43 @@ public class Model {
 			DefaultWeightedEdge e = grafo .getEdge(f, fInput);
 			double peso = grafo.getEdgeWeight(e);
 			
-			FoodNumber nuovo = new FoodNumber(f, peso);
+			result.add(new FoodNumber(f, peso));
 			
-			try{
-				FoodNumber ultimo = result.get(k-1);
-				if(ultimo.getN() < peso){
-					ultimo = nuovo;
-				}
-			}catch(IndexOutOfBoundsException iob) {
-
-				result.add(nuovo);
-			}
-
-			
-			Collections.sort(result,new Comparator<FoodNumber>() {
-				@Override
-				public int compare(FoodNumber f1, FoodNumber f2) {
-					return f2.getN().compareTo(f1.getN());
-				}
-			});
 		}
+
+		Collections.sort(result,new Comparator<FoodNumber>() {
+			@Override
+			public int compare(FoodNumber f1, FoodNumber f2) {
+				return f2.getN().compareTo(f1.getN());
+			}
+		});
+		if(result.size()>k) {
+			return result.subList(0, k);	
+		}
+			
+		return result;
+	}
+	
+	public List<FoodNumber> getAdiacenti(Food fInput){
+		List<FoodNumber> result = new ArrayList<>();
+		for(Food f: Graphs.neighborListOf(grafo, fInput)) {
+			DefaultWeightedEdge e = grafo .getEdge(f, fInput);
+			double peso = grafo.getEdgeWeight(e);
+			
+			result.add(new FoodNumber(f, peso));
+			
+		}
+
+		Collections.sort(result,new Comparator<FoodNumber>() {
+			@Override
+			public int compare(FoodNumber f1, FoodNumber f2) {
+				return f2.getN().compareTo(f1.getN());
+			}
+		});
 		return result;
 	}
 	
 	public void init(int k, Food finput) {
-		NPREPARATI = 0;
 		TTOTALE = 0;
 		kLiberi = 0;
 		nonDisponibili = new ArrayList<>();
@@ -101,28 +112,28 @@ public class Model {
 		FoodNumber f;
 		while((f = queue.poll()) != null) {
 			kLiberi++;
-			this.NPREPARATI++;
 			double tempoT = f.getN();
-			if(TTOTALE < tempoT) {
-				TTOTALE = tempoT;
-			}
-			List<FoodNumber> adiacenti = this.getAdiacenti(f.getF(), kLiberi);
-			if(!adiacenti.isEmpty()) {
-				for(FoodNumber fn: adiacenti) {
+			TTOTALE = tempoT;
+
+			List<FoodNumber> adiacenti = this.getAdiacenti(f.getF());
+			
+			for(FoodNumber fn: adiacenti) {
 					Food food = fn.getF();
 					if(!nonDisponibili.contains(food)) {
 						queue.add(new FoodNumber(food, tempoT+fn.getN()));
 						kLiberi--;	
 						nonDisponibili.add(food);
+						if(kLiberi <= 0) {
+							break;
+						}
 					}
 
-				}
 			}
 		}
 	}
 	
 	public int getNPreparati() {
-		return this.NPREPARATI;
+		return this.nonDisponibili.size();
 	}
 	
 	public double getTempo() {
